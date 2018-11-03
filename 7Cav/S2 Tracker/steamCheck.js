@@ -1,5 +1,5 @@
 function steamCheck() {//Checks for various information including: SteamID (x64), VAC Ban, Steam Username, Profile Privacy
-  var APIkey = "CF756B189CF00EBDC54AE38C2FB3CE76";
+  var APIkey = PropertiesService.getScriptProperties().getProperty("SteamAPI");
   
   var sheetCheck = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Primary"); //Spreadsheet to check. May be converted to an input for the function
   var titleLocation = findTitle(sheetCheck, "SteamID (x64)");
