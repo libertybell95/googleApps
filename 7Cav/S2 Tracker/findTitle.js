@@ -2,7 +2,7 @@ function findTitle(sheet, keyword, rowLimit) {
   /*
   Name: findTitle
   Author: Joshua Bell (joshuakbell@gmail.com)
-  Description: Looks for the location of a title on a spreasheet for to provide a reference for further functions
+  Description: Looks for the location of a title on a spreasheet to provide a reference for further functions
   
   Input:
     0: Sheet object to search
