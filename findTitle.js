@@ -9,8 +9,8 @@ function findTitle(sheet, keyword, rowLimit) {
     1: Keyword to search for, CASE SENSITIVE
     2: Number of rows to search, will max out at 5 if limit not defined (optional)
   Output:
-    0: Row number
-    1: Column number
+    row : Row Number
+    column : Column Number
   */
   
   try {sheet.getRange(1,1);} catch(error) {throw new Error("findTitle: sheet undefined")} //Checks if sheet object is defined and correct
@@ -30,7 +30,12 @@ function findTitle(sheet, keyword, rowLimit) {
     }
     if (outputCol >= 0) {break;} 
   } 
-  if (rowIndex == rowLimit) {throw new Error("findTitle: Title not found, search is case sensitive");}
+  if (rowIndex == rowLimit) {throw new Error("findTitle: Title not found, search is case sensitive")};
   
-  return[rowIndex, outputCol];
+  var output = {
+    row : rowIndex,
+    column : outputCol
+  };
+  
+  return(output);
 }
