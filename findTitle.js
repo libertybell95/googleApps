@@ -9,8 +9,8 @@ function findTitle(sheet, keyword, rowLimit) {
     1: Keyword to search for, CASE SENSITIVE
     2: Number of rows to search, will max out at 5 if limit not defined (optional)
   Output:
-    0: Column number
-    1: Row number
+    0: Row number
+    1: Column number
   */
   
   try {sheet.getRange(1,1);} catch(error) {throw new Error("findTitle: sheet undefined")} //Checks if sheet object is defined and correct
