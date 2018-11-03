@@ -14,10 +14,10 @@ function findTitle(sheet, keyword, rowLimit) {
   */
   
   try {sheet.getRange(1,1);} catch(error) {throw new Error("findTitle: sheet undefined")} //Checks if sheet object is defined and correct
-  if (typeof keyword == 'undefined') {throw new Error("findTitle: keyword undefined");} //Checks if keyword is defined
+  if (typeof keyword == null) {throw new Error("findTitle: keyword undefined");} //Checks if keyword is defined
   
   var lastCol = sheet.getLastColumn(); //Last column (number) on SpreadSheet
-  if (typeof rowLimit == 'undefined') {rowLimit = 5;}
+  if (typeof rowLimit == null) {rowLimit = 5;}
   
   for (var rowIndex = 1; rowIndex < rowLimit; rowIndex++) { //Loops through defined number of rows sequentially
     for (var colIndex = 1; colIndex < lastCol; colIndex++) { //Finds value in a single row
