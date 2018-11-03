@@ -12,11 +12,11 @@ function fileNameTagger(masterFolderID ,textSet, setOperation, setLocation, subF
     4: Whether or not the operation will be performed on the sub folders also. Will only look in 2 levels of sub-folders (0=No, 1=Yes) [Optional, will default to 0]
   */
   
-  masterFolderID = "1RY7cvfpWq9PrCRi4l6If1Yu7y_hFa"; //For debugging use, remove comment lines at beginning of line for use.
-  textSet = "[Local]"; //For debugging use, remove comment lines at beginning of line for use.
-  setOperation = 1; //For debugging use, remove comment lines at beginning of line for use.
-  setLocation = 0; //For debugging use, remove comment lines at beginning of line for use.
-  subFolders = 1; //For debugging use, remove comment lines at beginning of line for use.
+  //masterFolderID = "1RY7cvfpWq9PrCRi4l6If1Yu7y_hFa"; //For debugging use, remove comment lines at beginning of line for use.
+  //textSet = "[Local]"; //For debugging use, remove comment lines at beginning of line for use.
+  //setOperation = 1; //For debugging use, remove comment lines at beginning of line for use.
+  //setLocation = 0; //For debugging use, remove comment lines at beginning of line for use.
+  //subFolders = 1; //For debugging use, remove comment lines at beginning of line for use.
   
   //Error Checking
   try {DriveApp.getFolderById(masterFolderID)} catch(error) {throw new Error("Folder ID not found");} //Checks for a proper folder ID
