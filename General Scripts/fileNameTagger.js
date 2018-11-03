@@ -23,7 +23,7 @@ function fileNameTagger(masterFolderID ,textSet, setOperation, setLocation, subF
   if (typeof textSet != 'string') {throw new Error("textSet entered incorrectly ("+typeof textSet+")")} //Tests to ensure that textSet is a string
   if (setOperation != 0 && setOperation != 1) {throw new Error("Incorrect operation type given ("+setOperation+")")} //Checks for proper setOperation
   if (setLocation != 0 && setLocation != 1) {throw new Error("Incorrect location type given ("+setLocation+")")} //checks for proper setLocation
-  if (subFolders == 'undefined') {subFolders = 0;} //Defaults subFolders input if not given by user
+  if (subFolders == null) {subFolders = 0;} //Defaults subFolders input if not given by user
   
   //+++++Compile folder listing - START+++++
   function getSubFolders(parent) {
