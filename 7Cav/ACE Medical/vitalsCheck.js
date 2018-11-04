@@ -1,13 +1,15 @@
 function vitalsCheck(HR, BPS, BPD) {
+  //Reference Document: https://docs.google.com/document/d/1S3bOxak-3MGunz_t46ePeMrGgpId1cbQAT5yekX7xa0/edit?usp=sharing
+  
   var HRLevel; //Heart Rate. Levels are: Very Low, Low, Normal, High, Very High, Extra High
   var BPSLevel; //Blood Pressure (Systolic). Levels are: Very Low, Low, Normal, High, Very High
   var BPDLevel; //Blood Pressure (Diastolic). Levels are: Low, Normal
   var cardiacArrest; //Cardiac Arrest risk | 0: None, 1: Possible, 2: Immediate
   
   //Control varables. For testing only.
-  HR = 180;
-  BPS = 140;
-  BPD = 100;
+  //HR = 180;
+  //BPS = 140;
+  //BPD = 100;
   
   //else-if chain to establish HRLevel
   if (HR <= 20) {
