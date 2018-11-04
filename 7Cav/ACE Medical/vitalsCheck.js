@@ -1,10 +1,11 @@
 function vitalsCheck(HR, BPS, BPD) {
   /*
-  /*
   Name: vitalsCheck
   Author: Joshua Bell (joshuakbell@gmail.com)
   Reference Document: https://docs.google.com/document/d/1S3bOxak-3MGunz_t46ePeMrGgpId1cbQAT5yekX7xa0/edit?usp=sharing
-  Description: Checks vitals provided and asseses risk for cardiac arrest in ACE 3 Medical. NOT FOR REAL LIFE APPLICATION, FOR USE IN ARMA 3 ONLY. Built for integration into Google Home Mini smart assistant.
+  Description: Checks vitals provided and asseses risk for cardiac arrest in ACE 3 Medical. 
+    NOT FOR REAL LIFE APPLICATION, FOR USE IN ARMA 3 ONLY. 
+    Built for integration into Google Home Mini smart assistant.
   
   Input:
     0: Heart Rate [Number]
@@ -12,9 +13,11 @@ function vitalsCheck(HR, BPS, BPD) {
     2: Blood Pressure - Diastolic [Number]
     
   Output:
-    0: Vitals report. If all signs are normal then function will say all normal. If risk for cardiac arrest is high function will say what components are attributing to the heightened risk. If patient is in cardiac arrest function will command to begin CPR and say what cause patient to go into cardiac arrest [String]
-  
-  *
+    0: Vitals report. If all signs are normal then function will say all normal. 
+      If risk for cardiac arrest is high function will say what components are 
+      attributing to the heightened risk. If patient is in cardiac arrest function 
+      will command to begin CPR and say what cause patient to go into cardiac arrest [String]
+  */
   
   var HRLevel; //Heart Rate. Levels are: Very Low, Low, Normal, High, Very High, Extra High
   var BPSLevel; //Blood Pressure (Systolic). Levels are: Very Low, Low, Normal, High, Very High
