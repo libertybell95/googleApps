@@ -6,7 +6,7 @@ function getActiveEmployees() {//Gets list of active employees
     Name | Email | Position | Status
 
   Output:
-    0 - <OutputType> | <OutputDescription>
+    0 - Array | Outputs multidimensional array with each primary index having an array that has the employee name and their email address
   */
   var sheetEmployeeList = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Employee List"); //Grabs sheet called employee list
   var selection = sheetEmployeeList.getRange(2, 1, sheetEmployeeList.getLastRow(), 4).getValues(); //Ignores title row
@@ -19,4 +19,11 @@ function getActiveEmployees() {//Gets list of active employees
   }
   
   return(activeEmployees);
+  /*
+    Example:
+    activeEmployees = [
+      [John Smith, jsmith@gmail.com],
+      [Mary Short, mshort@gmail.com]
+    ]
+  */
 }
