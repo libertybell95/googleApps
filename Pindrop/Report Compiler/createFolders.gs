@@ -1,4 +1,4 @@
-function createFolders() {//Creates and shares folders for new employees
+function createFolders() {
   /*
   Name: createFolders
   Author: Joshua Bell (joshuakbell@gmail.com)
