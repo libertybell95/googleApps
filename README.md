@@ -1,4 +1,5 @@
-# Google Apps Scripts
-Utilities specifically made for use in Google Apps Scripts.
+# Google Apps Script
 
-Divided into projects that usually compromise what sheet, document, or file that the script will be bound to.
+Utilities specifically made for use in [Google Apps Script](https://developers.google.com/apps-script/).
+
+Divided into projects that usually compromise what spreadsheet, document, or file that the script will be bound to.
