@@ -1,17 +1,22 @@
 var resultsArray = [];
 
-function fullRankExtractor(nameArray) {//Does things with ranks
+function rankExtractor_Full(nameArray) {//Does things with ranks
   /*
-  Name: <functionName>
+  Name: rankExtractor_full
   Author: Joshua Bell (joshuakbell@gmail.com)
-  Description: <Function description>
+  Description: Extracts information from an array of trooper ranks/names (Ex: Corporal Kyle Bell)
+  
   Input:
-    <inputName> {type} - <description>
-    
+    nameArray {array} - Array with each index being a trooper's full rank and name (Ex: Corporal Kyle Bell)
+  
   Output:
-    <outputName> {type} - <description>
+    result {array} - Array with infomration about each trooper provided in the input. Each index contains an object literal with the following key/value pairs
+      fullName {string} - Full rank/name of trooper (Ex: Corporal Kyle Bell)
+      trooperName {string} - Trooper name without rank (Ex: Kyle Bell)
+      fullRank {string} - Full rank of the trooper (Ex: Corporal)
+      shortRank {string} - 3-Digit rank of the trooper (Ex: CPL)
+      rankLength {number} - Character length of the troopers fullRank (Ex: 7.0)
   */
-  nameArray = ["Sergeant Dick Withers", "General Cock Johnson", "Private Tiny Testicle"];
   
   if (Array.isArray(nameArray) && typeof nameArray[0] === 'string') {} else {//Checks to make sure that an array has been entered and that first index in that array is a string value
     throw new Error("rankTools: Argument is not an array");
@@ -170,7 +175,5 @@ function fullRankExtractor(nameArray) {//Does things with ranks
   function compileResults(trooperData) {
     resultsArray.push(trooperData);
   }
-  
-  Logger.log(resultsArray);
   return resultsArray;
 }
