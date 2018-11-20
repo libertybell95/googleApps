@@ -4,8 +4,8 @@ Author: Joshua Bell (joshuakbell@gmail.com)
 Description: <Function description>
 
 Input:
-  0 - <InputType> | <InputDescription>
+  <inputName> {type} - <description>
   
 Output:
-  0 - <OutputType> | <OutputDescription>
+  <outputName> {type} - <description>
 */
