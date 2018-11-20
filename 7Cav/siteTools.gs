@@ -1,20 +1,23 @@
 function siteTools() {//For those that may stumble up on this code. This is my first project attempting object-oriented programming, enjoy. :)
   
   //Get Session Cookie - START || Fetches xf7cav_session cookie and assigns it to this.cookie
-  this.getCookie = function() {
-    this.payload = {
+  this.getCookie = function(user, pw) {
+    var cookieOptions = {};
+    
+    cookieOptions.payload = {
       'login' : PropertiesService.getScriptProperties().getProperty('cavEmail'),
       'password' : PropertiesService.getScriptProperties().getProperty('cavPW'),
       'register' : 0
     };
-    this.options = {
+    
+    cookieOptions.options = {
       'method' : 'post',
-      'payload' : this.payload,
+      'payload' : cookieOptions.payload,
       'followRedirects' : false
     };
     
-    this.login = UrlFetchApp.fetch('https://7cav.us/login/login', this.options);
-    this.cookie = this.login.getAllHeaders()['Set-Cookie'].split(';')[0]+';';
+    cookieOptions.login = UrlFetchApp.fetch('https://7cav.us/login/login', this.options);
+    this.cookie = cookieOptions.login.getAllHeaders()['Set-Cookie'].split(';')[0]+';';
     
     return this.cookie;
   }
@@ -22,12 +25,13 @@ function siteTools() {//For those that may stumble up on this code. This is my f
   this.getPage = function(URL) {//Retrieves raw HTML of page
     if ((URL.search(/7cav.us/i)) == -1.0) {throw new Error("Invalid Thread URL Entered")} //Checks that URL includes 7cav.us
     
-    this.options = {
-      'method' : 'get',
-      'headers' : {'Cookie': this.getCookie()}
+    var options = {
+      'method': 'get',
+      'headers': {'Cookie': this.getCookie()},
+      'followRedirects': true
     };
     
-    this.HTML = UrlFetchApp.fetch(URL, this.options).getContentText();
+    this.HTML = UrlFetchApp.fetch(URL, options).getContentText();
     
     return this.HTML;
   }
@@ -88,7 +92,7 @@ siteTools.prototype.getThreads = function(URL, pageOptions) {//Gets list of thre
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-siteTools.prototype.parseThread = function(URL) {//Extracts certain information from a thread (Only will parse 1 page, for now)
+siteTools.prototype.parseThread = function(URL, pageOptions) {//Extracts certain information from a thread (Only will parse 1 page, for now)
   /*
   Input:
    URL {string} - URL of thread to be parsed
@@ -114,7 +118,7 @@ siteTools.prototype.parseThread = function(URL) {//Extracts certain information 
   //OUTPUT - title
   threadContents.title = this.HTML.match(/og:title.*="(.*)\"/)[1];
   //OUTPUT - id
-  threadContents.id = URL.match(/\.(\d{2,})\//)[1];
+  threadContents.id = URL.match(/\/*(\d+)\//)[1];
   //OUTPUT - threadAuthor
   threadContents.threadAuthor = this.HTML.match(/Discussion in.*username.*?>(.*?)</)[1];
   //OUTPUT - parentForum
@@ -126,9 +130,10 @@ siteTools.prototype.parseThread = function(URL) {//Extracts certain information 
   //OUTPU - posts
   threadContents.posts = [];
   var content = this.HTML.match(/SelectQuoteContainer.[\s\S]*?data-diff/g); //Grabs raw HTML of each post (not content graber
+  //Logger.log(content[0]);
   for (var i in content) {//Loops through each posts raw HTML and grabs pertinent information
     var post = {};//Literal that each posts information will be encapsulated in
-    post.content = content[i].match(/baseHtml".([\s\S]*?)<div/)[1];//Raw HTML of post content (what you see the user has typed in to make the post)
+    post.content = content[i].match(/baseHtml".([\s\S]*?)<div class="message/)[1];//Raw HTML of post content (what you see the user has typed in to make the post)
     post.author = content[i].match(/auto..(.*?)</)[1]; //Cav name of post author (Ex: Smith.J)
     post.date =  new Date(parseInt(content[i].match(/data-time..(.*)...?data-diff/)[1], 10) * 1000); //Date that post was made
     
@@ -245,7 +250,7 @@ siteTools.prototype.getRoster = function(URL) {
 
 function testing() {
   var tool = new siteTools();
-  var out = tool.parseThread("https://7cav.us/threads/s6-imo-assistant-assigned.41354/").dateUpdate;
+  var out = tool.parseThread("https://7cav.us/threads/aar-post-scriptum-campaign-november-wnps-day-of-days.41423/").posts[0].content;
   //var out = tool.getThreads("https://7cav.us/forums/troop-transfers.35/")[3].test;
   //var out = tool.getRoster("https://7cav.us/rosters/?id=1")[56].fullName;
   //var out = tool.getMilpac("https://7cav.us/rosters/profile?uniqueid=1607").awards[0].date;
