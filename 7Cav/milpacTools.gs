@@ -1,4 +1,22 @@
-function negativeDays(milpacID) {// Determine negative days from a Milpac
+function negativeDays(milpacID) {
+  /**
+   * Author: Joshua Bell (joshuakbell@gmail.com)
+   * Description: Gets a list of all negative days that a trooper has based off of their milpac service record. Negative days count as any time spend discharged or on (non-military) ELOA
+   *
+   * Input:
+   *   milpacID {number} - Valid Milpac ID. Found in Milpac URL
+   * 
+   * Output:
+   *   this {array} - Array with each index contatining an object literal with information about the negative days.
+   *     startEntry {string} - Service record where negative day entry started
+   *     startDate {string} - Date when negative day entry started
+   *     endEntry {string} - Service record where negative day entry ended
+   *     endDate {string} - Date when negative day entry ended
+   *     length {number} - Number of days between endDate and startDate
+   *
+   * Example of output converted to a JSON for milpacID 446: https://pastebin.com/VcmtiAdF
+   */
+  
   var records = new siteTools().getMilpac('https://7cav.us/rosters/profile?uniqueid='+milpacID).serviceRecords.reverse(); // Gets service records and reverses the order so their oldest to newest
   
   var negativeRecords = [];
@@ -32,10 +50,26 @@ function negativeDays(milpacID) {// Determine negative days from a Milpac
     }
     
   }
+  
   return negativeRecords;
 }
 
-function promotions(milpacID) { // Gets a list of all promotions from a milpac
+function rankChanges(milpacID) {
+  /**
+   * Author: Joshua Bell (joshuakbell@gmail.com)
+   * Description: Gets a list of all rank changes from a troopers milpac
+   *
+   * Input:
+   *   milpacID {number} - Valid Milpac ID. Found in Milpac URL
+   * 
+   * Output:
+   *   this {array} - Array with each index contatining an object literal with information about each rank change.
+   *     date {string} - Date of rank change service record entry
+   *     entry {string} - Service record entry of rank change
+   *     paygrade {string} - Paygrade of rank change (Ex: E-2)
+   *     rankChange {string} - What type of rank change. Possible values are: Boot Camp Promotion, Current Rank, Promotion, Reduction
+   */
+  
   milpacID = 111;
   var records = new siteTools().getMilpac('https://7cav.us/rosters/profile?uniqueid='+milpacID).serviceRecords.reverse(); // Gets service records and reverses the order so their oldest to newest
   
@@ -75,5 +109,6 @@ function promotions(milpacID) { // Gets a list of all promotions from a milpac
       rankChange: rankChange
     });
   }
+  
   return output;
 }
