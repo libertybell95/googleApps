@@ -14,7 +14,7 @@ function negativeDays(milpacID) {
    *     endDate {string} - Date when negative day entry ended
    *     length {number} - Number of days between endDate and startDate
    *
-   * Example of output converted to a JSON for milpacID 446: https://pastebin.com/VcmtiAdF
+   * Example of output converted to JSON format for milpacID 446: https://pastebin.com/VcmtiAdF
    */
   
   var records = new siteTools().getMilpac('https://7cav.us/rosters/profile?uniqueid='+milpacID).serviceRecords.reverse(); // Gets service records and reverses the order so their oldest to newest
@@ -68,18 +68,18 @@ function rankChanges(milpacID) {
    *     entry {string} - Service record entry of rank change
    *     paygrade {string} - Paygrade of rank change (Ex: E-2)
    *     rankChange {string} - What type of rank change. Possible values are: Boot Camp Promotion, Current Rank, Promotion, Reduction
+   *
+   * Example of output converted to a JSON format for milpacID 446: https://pastebin.com/iMwgViNf
    */
   
-  milpacID = 111;
   var records = new siteTools().getMilpac('https://7cav.us/rosters/profile?uniqueid='+milpacID).serviceRecords.reverse(); // Gets service records and reverses the order so their oldest to newest
+  var paygrades = ['E-1','E-2','E-3','E-4','E-5','E-6','E-7','E-8','E-9','W-1','W-2','W-3','W-4','W-5','O-1','O-2','O-3','O-4','O-5','O-6','O-7','O-8','O-9','O-10'];
   
   var promoRecords = [];
   for (var i in records) { // Builds an array of all the records that have the paygrade listed in them
     if (records[i].entry.search(/(E|W|O)-\d/i) != -1.0) {promoRecords.push(records[i]);}
   } 
   
-  var paygrades = ['E-1','E-2','E-3','E-4','E-5','E-6','E-7','E-8','E-9','W-1','W-2','W-3','W-4','W-5','O-1','O-2','O-3','O-4','O-5','O-6','O-7','O-8','O-9','O-10'];
-      Logger.log(promoRecords.length);
   var output = [];
   for (var i = 0; i < promoRecords.length; i++) {
     var rankChange = '';
