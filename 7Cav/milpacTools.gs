@@ -99,6 +99,7 @@ function rankChanges(milpacID) {
    * Example of output converted to a JSON format for milpacID 446: https://pastebin.com/iMwgViNf
    */
   
+  if (typeof milpacID != 'number') {throw new Error('negativeDays() incorrect milpac ID. Number not given');}
   var records = new siteTools().getMilpac('https://7cav.us/rosters/profile?uniqueid='+milpacID).serviceRecords.reverse(); // Gets service records and reverses the order so their oldest to newest
   var paygrades = ['E-1','E-2','E-3','E-4','E-5','E-6','E-7','E-8','E-9','W-1','W-2','W-3','W-4','W-5','O-1','O-2','O-3','O-4','O-5','O-6','O-7','O-8','O-9','O-10'];
   
