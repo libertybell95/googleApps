@@ -16,6 +16,7 @@ function negativeDays(milpacID) {
    *
    * Example of output converted to JSON format for milpacID 446: https://pastebin.com/VcmtiAdF
    */
+  if (typeof milpacID != 'number') {throw new Error('negativeDays() incorrect milpac ID. Number not given');}
   var records = new siteTools().getMilpac('https://7cav.us/rosters/profile?uniqueid='+milpacID).serviceRecords.reverse(); // Gets service records and reverses the order so their oldest to newest
   
   var startTerms = [ // Start terms to search for, search will be case insensitive.
