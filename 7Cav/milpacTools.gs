@@ -16,8 +16,35 @@ function negativeDays(milpacID) {
    *
    * Example of output converted to JSON format for milpacID 446: https://pastebin.com/VcmtiAdF
    */
-  
   var records = new siteTools().getMilpac('https://7cav.us/rosters/profile?uniqueid='+milpacID).serviceRecords.reverse(); // Gets service records and reverses the order so their oldest to newest
+  
+  var startTerms = [ // Start terms to search for, search will be case insensitive.
+    'ELOA',
+    'Discharge',
+    'Discharged',
+    'Retire',
+    'Retired'
+  ];
+  
+  var endTerms = [ // End terms to search for, search will be case insensitive.
+    're-en-stated',
+    'reenlisted',
+    'returned',
+    '-7'
+  ];
+  
+  function getTermRegex(termsArray) { // Creates regular expresssion based off of terms given.
+    var regex = "";
+    for (var i = 0; i < termsArray.length; i++) { // Appends terms together with a pipe seperating each. If last term, will not put pipe after term
+      if (i == termsArray.length-1) {
+        regex += termsArray[i];
+      } else {
+        regex += termsArray[i]+'|';
+      }
+    }
+    regex = new RegExp(regex,'i');  
+    return regex;
+  }
   
   var negativeRecords = [];
   var skipCount = 0;
@@ -26,12 +53,12 @@ function negativeDays(milpacID) {
     var recordDate = records[i].date;
     if (skipCount > 0) {skipCount--; continue;}
     
-    if(recordEntry.search(/(ELOA|Discharge|Discharged|Retire|Retired)/i) != -1.0) { // If start keyword is found (Case insensitive)
+    if(recordEntry.search(getTermRegex(startTerms)) != -1.0) { // If start keyword is found (Case insensitive)
       if (recordEntry.search(/Military/i) != -1.0) {skipCount = 1; continue;} // If start keyword is Military ELOA skip that record and it's next one
       var localRecord = records.slice(i); // Make temporary array that contains all records that occur after the index that the start keyword was found at
       for (var q in localRecord) {
         skipCount++;
-        if (localRecord[q].entry.search(/(re-en-stated|reenlited|returned|-7)/i) != -1.0) { // If '-7' is found (usually indicates a transfer) add information to negativeRecord
+        if (localRecord[q].entry.search(getTermRegex(endTerms)) != -1.0) { // If '-7' is found (usually indicates a transfer) add information to negativeRecord
           var date1 = new Date(recordDate);
           var date2 = new Date(localRecord[q].date);
           var timeDiff = Math.abs(date2.getTime() - date1.getTime());
@@ -48,7 +75,6 @@ function negativeDays(milpacID) {
         }
       }
     }
-    
   }
   
   return negativeRecords;
@@ -109,6 +135,5 @@ function rankChanges(milpacID) {
       rankChange: rankChange
     });
   }
-  
   return output;
 }
