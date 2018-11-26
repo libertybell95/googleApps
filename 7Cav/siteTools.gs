@@ -16,7 +16,7 @@ function siteTools() {//For those that may stumble up on this code. This is my f
       'followRedirects' : false
     };
     
-    cookieOptions.login = UrlFetchApp.fetch('https://7cav.us/login/login', this.options);
+    cookieOptions.login = UrlFetchApp.fetch('https://7cav.us/login/login', cookieOptions.options);
     this.cookie = cookieOptions.login.getAllHeaders()['Set-Cookie'].split(';')[0]+';';
     
     return this.cookie;
@@ -41,22 +41,23 @@ function siteTools() {//For those that may stumble up on this code. This is my f
 
 siteTools.prototype.getThreads = function(URL, pageOptions) {//Gets list of threads present on (only will get threads from 1 page, for now)
   /*
-  Input:
-   URL {string} - URL of forum board to get.
-   pageOptions {number} - How the functions will handle pages (Default: 0)
-     0 - Only first page
-     1 - All pages
-     2 - Only last page
-  
-  Output:
-    threads {array} - array of threads. Each index will contain an object literal with thread information
-    title {string} -  thread title/name
-    id {number} - thread ID to be used when fetching URL
-    author {string} - thread author
-    startDate {date} - date thread was started
-    updateDate {date} - date of threads most recent post
-  
-  */
+   * 
+   * Input:
+   *  URL {string} - URL of forum board to get.
+   *  pageOptions {number} - How the functions will handle pages (Default: 0)
+   *    0 - Only first page
+   *    1 - All pages
+   *    2 - Only last page
+   * 
+   * Output:
+   *   threads {array} - array of threads. Each index will contain an object literal with thread information
+   *   title {string} -  thread title/name
+   *   id {number} - thread ID to be used when fetching URL
+   *   author {string} - thread author
+   *   startDate {date} - date thread was started
+   *   updateDate {date} - date of threads most recent post
+   * 
+   */
   
   //Tests to make sure that URL is a forum board. Will throw error if trying to get Threads for main website forum
   if ((URL.search(/\/forums\/./)) == -1.0) {throw new Error("Invalid Forum URL Entered: " + URL)}
@@ -94,21 +95,21 @@ siteTools.prototype.getThreads = function(URL, pageOptions) {//Gets list of thre
 
 siteTools.prototype.parseThread = function(URL, pageOptions) {//Extracts certain information from a thread (Only will parse 1 page, for now)
   /*
-  Input:
-   URL {string} - URL of thread to be parsed
-  
-  Output:
-    title {string} - Thread title
-    id {number} - thread ID indicated in the URL
-    threadAuthor {string} - Author of thread
-    parentForum {string} - Name of parent forum thread is contained in
-    dateStart {date} - timestamp for thread start
-    posts {array} - Array containing information about each post. Each index will contain an object literal with post information
-      author {string} - post Author
-      date {date} - timestamp for post
-      contents {string} - raw HTML of the post
-    dateUpdate {date} - date of last post
-  */
+   * Input:
+   *  URL {string} - URL of thread to be parsed
+   * 
+   * Output:
+   *   title {string} - Thread title
+   *   id {number} - thread ID indicated in the URL
+   *   threadAuthor {string} - Author of thread
+   *   parentForum {string} - Name of parent forum thread is contained in
+   *   dateStart {date} - timestamp for thread start
+   *   posts {array} - Array containing information about each post. Each index will contain an object literal with post information
+   *     author {string} - post Author
+   *     date {date} - timestamp for post
+   *     contents {string} - raw HTML of the post
+   *   dateUpdate {date} - date of last post
+   */
   
   if ((URL.search(/\/threads\//)) == -1.0) {throw new Error("Invalid Thread URL Entered: " + URL)}
   
@@ -150,26 +151,27 @@ siteTools.prototype.parseThread = function(URL, pageOptions) {//Extracts certain
 
 siteTools.prototype.getMilpac = function(URL) {//Gets information about a milpac. Does not require login
   /*
-  Description: Gets information about a milpac. Does not require login
-  
-  Input:
-    URL {string} - Milpac URL
-    
-  Output:
-    fullName {string} - Trooper's full name (Ex: John Smith)
-    rank {string} - Trooper's rank (Ex: Private First Class)
-    primaryBillet {string} - Troopers primary position
-    secondaryBillets {array} - Troopers primary position. Returns 'N/A' if trooper does not have any secondary billets [TODO: Parse array of billets]
-    enlistedDate {string} - Date trooper enlisted
-    promotionDate {string} - Date trooper was last promoted
-    serviceRecord {array} - Array containing each service record entry. Each index will be an object literal with infomration about the entry
-      date {number} - Date of record
-      entry {string} - Record entry
-    awards {array} - Array containing each award entry. Each index will be an object literal with information about the award
-      date {number} - Date of award entry
-      name {string} - Name of award
-      details {string} - Details for award entry
-  */
+   * Author: Joshua Bell (joshuakbell@gmail.com) 
+   * Description: Gets information about a milpac. Does not require login
+   * 
+   * Input:
+   *   URL {string} - Milpac URL
+   *   
+   * Output:
+   *   fullName {string} - Trooper's full name (Ex: John Smith)
+   *   rank {string} - Trooper's rank (Ex: Private First Class)
+   *   primaryBillet {string} - Troopers primary position
+   *   secondaryBillets {array} - Troopers primary position. Returns 'N/A' if trooper does not have any secondary billets [TODO: Parse array of billets]
+   *   enlistedDate {string} - Date trooper enlisted
+   *   promotionDate {string} - Date trooper was last promoted
+   *   serviceRecord {array} - Array containing each service record entry. Each index will be an object literal with infomration about the entry
+   *     date {number} - Date of record
+   *     entry {string} - Record entry
+   *   awards {array} - Array containing each award entry. Each index will be an object literal with information about the award
+   *     date {number} - Date of award entry
+   *     name {string} - Name of award
+   *     details {string} - Details for award entry
+   */
   if ((URL.search(/rosters\/profile/)) == -1.0) {throw new Error("Invalid Milpac URL Entered: " + URL)}
   
   var HTML = UrlFetchApp.fetch(URL).getContentText();
@@ -183,13 +185,13 @@ siteTools.prototype.getMilpac = function(URL) {//Gets information about a milpac
   output.promotionDate = HTML.match(/promotionDate.[\s\S]*?dd>(.*)?<\//)[1];
   
   var rawRecords = HTML.match(/recordList.[\s\S]*?<\/table/)[0].match(/<td.*?recordDate.[\s\S]*?<\/tr>/g);
-  output.records = [];
+  output.serviceRecords = [];
   for (var i in rawRecords) {
     var literal = {};
     literal.date = rawRecords[i].match(/recordDate..(.*)?<\//)[1];
     literal.entry = rawRecords[i].match(/Details..(.*)?<\//)[1];
     
-    output.records[i] = literal;
+    output.serviceRecords[i] = literal;
   }
   
   var rawAwards = HTML.match(/awardList.[\s\S]*?<\/table/)[0].match(/<td.*?awardDate.[\s\S]*?<\/tr>/g);
@@ -210,49 +212,71 @@ siteTools.prototype.getMilpac = function(URL) {//Gets information about a milpac
 
 siteTools.prototype.getRoster = function(URL) {
   /*
-  Description: gets list of all personnel on a Milpac roster. Does not require login
-  
-  Input:
-    URL {string} - Roster URL
-  Output:
-   troopers {array} - Array containing information about each trooper. Each index will contain an object literal with each trooper's information
-     rankIcon {string} - Image URL for troopers rank
-     id {number} - Milpac ID used in troopers Milpac URL
-     fullName {string} - Full name with rank of trooper. (Ex: Sergeant John Smith)
-     enlistedDate {string} - Date trooper enlisted
-     promotionDate {string} - Date trooper was last promoted
-     primaryBillet {string} - Trooper's primary billet
-  */
+   * Author: Joshua Bell (joshuakbell@gmail.com)
+   * Description: gets list of all personnel on a Milpac roster. Does not require login
+   * 
+   * Input:
+   *   URL {string} - Roster URL
+   * Output:
+   *  troopers {array} - Array containing information about each trooper. Each index will contain an object literal with each trooper's information
+   *    rank {object} - Object literal with infomration about the troopers rank.
+   *      shortRank {string} - 3 character abbreviation of the rank. (Ex: Specialist is SPC)
+   *      longRank {string} - Full spelling of rank. (Ex: Specialist)
+   *    id {number} - Milpac ID used in troopers Milpac URL
+   *    fullName {string} - Full name with rank of trooper. (Ex: Sergeant John Smith)
+   *    enlistedDate {string} - Date trooper enlisted
+   *    promotionDate {string} - Date trooper was last promoted
+   *    primaryBillet {string} - Trooper's primary billet
+   */
   
   //Checks if proper roster URL has been entered
   if ((URL.search(/us\/rosters/)) == -1.0) {throw new Error("Invalid Roster URL Entered")}
   
+  var rankImageTable = { // URL number that rank represents
+    '28': {shortRank: 'RCT', longRank: 'Recruit'},
+    '27': {shortRank: 'PVT', longRank: 'Private'},
+    '26': {shortRank: 'PFC', longRank: 'Private First Class'},
+    '25': {shortRank: 'SPC', longRank: 'Specialist'},
+    '24': {shortRank: 'CPL', longRank: 'Corporal'},
+    '23': {shortRank: 'SGT', longRank: 'Sergeant'},
+    '22': {shortRank: 'SSG', longRank: 'Staff Sergeant'},
+    '21': {shortRank: 'SFC', longRank: 'Sergeant First Class'},
+    '20': {shortRank: 'MSG', longRank: 'Master Sergeant'},
+    '19': {shortRank: '1SG', longRank: 'First Sergeant'},
+    '18': {shortRank: 'SGM', longRank: 'Sergeant Major'},
+    '17': {shortRank: 'CSM', longRank: 'Command Sergeant Major'},
+    '16': {shortRank: 'WO1', longRank: 'Warrant Officer 1'},
+    '15': {shortRank: 'CW2', longRank: 'Chief Warrant Officer 2'},
+    '14': {shortRank: 'CW3', longRank: 'Chief Warrant Officer 3'},
+    '13': {shortRank: 'CW4', longRank: 'Chief Warrant Officer 4'},
+    '12': {shortRank: 'CW5', longRank: 'Chief Warrant Officer 5'},
+    '11': {shortRank: '2LT', longRank: 'Second Lieutenant'},
+    '10': {shortRank: '1LT', longRank: 'First Lieutenant'},
+    '9': {shortRank: 'CPT', longRank: 'Captain'},
+    '8': {shortRank: 'MAJ', longRank: 'Major'},
+    '7': {shortRank: 'LTC', longRank: 'Lieutenant Colonel'},
+    '6': {shortRank: 'COL', longRank: 'Colonel'},
+    '5': {shortRank: 'BG', longRank: 'Brigadier General'},
+    '4': {shortRank: 'MG', longRank: 'Major General'},
+    '3': {shortRank: 'LTG', longRank: 'Lieutenant General'},
+    '2': {shortRank: 'GEN', longRank: 'General'},
+    '1': {shortRank: 'GOA', longRank: 'General of the Army'},
+  };
+  
   var HTML = UrlFetchApp.fetch(URL).getContentText();
-  var rawTroopers = HTML.match(/<li.*rosterListItem.[\s\S]*?<\/li>/g);
+  var rawTroopers = HTML.match(/<li.*rosterListItem.[\s\S]*?<\/li>/g); // Gets batches of 
   
   var troopers = [];
   for (var i in rawTroopers) {
-    var trooper = {};
-    trooper.rankIcon = rawTroopers[i].match(/src..(.*)?"/)[1];
-    trooper.id = rawTroopers[i].match(/href.*?id.(\d+)"/)[1];
-    trooper.fullName = rawTroopers[i].match(/href.*\s{1,}(.*)/)[1];
-    trooper.enlistedDate = rawTroopers[i].match(/Enlisted..(.*)?</)[1];
-    trooper.promotionDate = rawTroopers[i].match(/Promo..(.*)?</)[1];
-    trooper.primaryBillet = rawTroopers[i].match(/Custom1..(.*)<\//)[1];
-    
-    troopers[i] = trooper;
+    troopers.push({
+      rankShort: rankImageTable[rawTroopers[i].match(/img src.*\/(\d+).jpg/)[1]],
+      id: rawTroopers[i].match(/href.*?id.(\d+)"/)[1],
+      fullName: rawTroopers[i].match(/href.*\s{1,}(.*)/)[1],
+      enlistedDate: rawTroopers[i].match(/Enlisted..(.*)?</)[1],
+      promotionDate: rawTroopers[i].match(/Promo..(.*)?</)[1],
+      primaryBillet: rawTroopers[i].match(/Custom1..(.*)<\//)[1]
+    });
   }
   
   return troopers;
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-function testing() {
-  var tool = new siteTools();
-  var out = tool.parseThread("https://7cav.us/threads/aar-post-scriptum-campaign-november-wnps-day-of-days.41423/").posts[0].content;
-  //var out = tool.getThreads("https://7cav.us/forums/troop-transfers.35/")[3].test;
-  //var out = tool.getRoster("https://7cav.us/rosters/?id=1")[56].fullName;
-  //var out = tool.getMilpac("https://7cav.us/rosters/profile?uniqueid=1607").awards[0].date;
-  Logger.log(out);
 }
