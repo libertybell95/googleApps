@@ -40,7 +40,7 @@ function siteTools() {//For those that may stumble up on this code. This is my f
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 siteTools.prototype.getThreads = function(URL, pageOptions) {//Gets list of threads present on (only will get threads from 1 page, for now)
-  /*
+  /**
    * 
    * Input:
    *  URL {string} - URL of forum board to get.
@@ -94,7 +94,7 @@ siteTools.prototype.getThreads = function(URL, pageOptions) {//Gets list of thre
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 siteTools.prototype.parseThread = function(URL, pageOptions) {//Extracts certain information from a thread (Only will parse 1 page, for now)
-  /*
+  /**
    * Input:
    *  URL {string} - URL of thread to be parsed
    * 
@@ -106,7 +106,7 @@ siteTools.prototype.parseThread = function(URL, pageOptions) {//Extracts certain
    *   dateStart {date} - timestamp for thread start
    *   posts {array} - Array containing information about each post. Each index will contain an object literal with post information
    *     author {string} - post Author
-   *     date {date} - timestamp for post
+   *     date {date} - timestamp for post, in UTC
    *     contents {string} - raw HTML of the post
    *   dateUpdate {date} - date of last post
    */
@@ -136,7 +136,7 @@ siteTools.prototype.parseThread = function(URL, pageOptions) {//Extracts certain
     var post = {};//Literal that each posts information will be encapsulated in
     post.content = content[i].match(/baseHtml".([\s\S]*?)<div class="message/)[1];//Raw HTML of post content (what you see the user has typed in to make the post)
     post.author = content[i].match(/auto..(.*?)</)[1]; //Cav name of post author (Ex: Smith.J)
-    post.date =  new Date(parseInt(content[i].match(/data-time..(.*)...?data-diff/)[1], 10) * 1000); //Date that post was made
+    post.date =  new Date(parseInt(content[i].match(/data-time..(.*)...?data-diff/)[1], 10) * 1000).toUTCString(); //Date that post was made
     
     threadContents.posts[i] = post;
   }  
@@ -149,13 +149,13 @@ siteTools.prototype.parseThread = function(URL, pageOptions) {//Extracts certain
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-siteTools.prototype.getMilpac = function(URL) {//Gets information about a milpac. Does not require login
-  /*
+siteTools.prototype.getMilpac = function(ID) {//Gets information about a milpac. Does not require login
+  /**
    * Author: Joshua Bell (joshuakbell@gmail.com) 
    * Description: Gets information about a milpac. Does not require login
    * 
    * Input:
-   *   URL {string} - Milpac URL
+   *   ID {number} - Milpac ID number. Found in trooper's milpac URL.
    *   
    * Output:
    *   fullName {string} - Trooper's full name (Ex: John Smith)
@@ -164,45 +164,80 @@ siteTools.prototype.getMilpac = function(URL) {//Gets information about a milpac
    *   secondaryBillets {array} - Troopers primary position. Returns 'N/A' if trooper does not have any secondary billets [TODO: Parse array of billets]
    *   enlistedDate {string} - Date trooper enlisted
    *   promotionDate {string} - Date trooper was last promoted
-   *   serviceRecord {array} - Array containing each service record entry. Each index will be an object literal with infomration about the entry
-   *     date {number} - Date of record
+   *   records {array} - Array containing each service record entry. Each index will be an object literal with infomration about the entry
+   *     date {date} - Date of record entry, in UTC
    *     entry {string} - Record entry
    *   awards {array} - Array containing each award entry. Each index will be an object literal with information about the award
-   *     date {number} - Date of award entry
+   *     date {date} - Date of award entry, in UTC
    *     name {string} - Name of award
    *     details {string} - Details for award entry
    */
-  if ((URL.search(/rosters\/profile/)) == -1.0) {throw new Error("Invalid Milpac URL Entered: " + URL)}
   
-  var HTML = UrlFetchApp.fetch(URL).getContentText();
-  var output = {};
+  if (typeof ID != 'number') {throw new Error("Invalid Milpac ID entered: " + ID)}
+  var HTML = UrlFetchApp.fetch('https://7cav.us/rosters/profile?uniqueid='+ID).getContentText();
   
-  output.fullName = HTML.match(/fullName.[\s\S]*?<dd>(.*)?<\//)[1];
-  output.rank = HTML.match(/Rank:.[\s\S]*?dd>(.*?)<\//)[1];
-  output.primaryBillet = HTML.match(/primaryPosition.[\s\S]*?dd>(.*)?<\//)[1];
-  //output.secondaryBillets = HTML.match()[1]; //TODO
-  output.enlistedDate = HTML.match(/enlistedDate.[\s\S]*?dd>(.*)?<\//)[1];
-  output.promotionDate = HTML.match(/promotionDate.[\s\S]*?dd>(.*)?<\//)[1];
+  var rankTable = {
+    'Recruit': 'RCT',
+    'Private': 'PVT',
+    'Private First Class': 'PFC',
+    'Specialist': 'SPC',
+    'Corporal': 'CPL',
+    'Sergeant': 'SGT',
+    'Staff Sergeant': 'SSG',
+    'Sergeant First Class': 'SFC',
+    'Master Sergeant': 'MSG',
+    'First Sergeant': '1SG',
+    'Sergeant Major': 'SGM',
+    'Command Sergeant Major': 'CSM',
+    'Warrant Officer 1': 'WO1',
+    'Chief Warrant Officer 2': 'CW2',
+    'Chief Warrant Officer 3': 'CW3',
+    'Chief Warrant Officer 4': 'CW4',
+    'Chief Warrant Officer 5': 'CW5',
+    'Second Lieutenant': '2LT',
+    'First Lieutenant': '1LT',
+    'Captain': 'CPT',
+    'Major': 'MAJ',
+    'Lieutenant Colonel': 'LTC',
+    'Colonel': 'COL',
+    'Brigadier General': 'BG',
+    'Major General': 'MG',
+    'Lieutenant General': 'LTG',
+    'General': 'GEN',
+    'General of the Army': 'GOA',
+  };
+  
+  var output = {
+    fullName: HTML.match(/fullName.[\s\S]*?<dd>(.*)?<\//)[1],
+    primaryBillet: HTML.match(/primaryPosition.[\s\S]*?dd>(.*)?<\//)[1],
+    //secondaryBillets: HTML.match()[1], //TODO
+    enlistedDate: HTML.match(/enlistedDate.[\s\S]*?dd>(.*)?<\//)[1],
+    promotionDate: HTML.match(/promotionDate.[\s\S]*?dd>(.*)?<\//)[1]
+  };
+
+  var rank = HTML.match(/Rank:.[\s\S]*?dd>(.*?)<\//)[1];
+  output.rank = {
+    short: rankTable[rank],
+    long: rank
+  };
   
   var rawRecords = HTML.match(/recordList.[\s\S]*?<\/table/)[0].match(/<td.*?recordDate.[\s\S]*?<\/tr>/g);
-  output.serviceRecords = [];
+  output.records = [];
   for (var i in rawRecords) {
-    var literal = {};
-    literal.date = rawRecords[i].match(/recordDate..(.*)?<\//)[1];
-    literal.entry = rawRecords[i].match(/Details..(.*)?<\//)[1];
-    
-    output.serviceRecords[i] = literal;
+    output.records.push({
+      date: new Date(rawRecords[i].match(/recordDate..(.*)?<\//)[1]).toUTCString(),
+      entry: rawRecords[i].match(/Details..(.*)?<\//)[1]
+    });
   }
   
   var rawAwards = HTML.match(/awardList.[\s\S]*?<\/table/)[0].match(/<td.*?awardDate.[\s\S]*?<\/tr>/g);
   output.awards = [];
   for (var i in rawAwards) {
-    var literal = {};
-    literal.date = rawAwards[i].match(/awardDate..(.*)?<\//)[1];
-    literal.name = rawAwards[i].match(/<td.*awardTitle..(.*)?<\/td>/)[1];
-    literal.details = rawAwards[i].match(/awardDetails..(.*)?<\//)[1];
-    
-    output.awards[i] = literal;
+    output.awards.push({
+      date: new Date(rawAwards[i].match(/awardDate..(.*)?<\//)[1]).toUTCString(),
+      name: rawAwards[i].match(/<td.*awardTitle..(.*)?<\/td>/)[1],
+      details: rawAwards[i].match(/awardDetails..(.*)?<\//)[1]
+    });
   }
   
   return output;
@@ -210,8 +245,8 @@ siteTools.prototype.getMilpac = function(URL) {//Gets information about a milpac
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-siteTools.prototype.getRoster = function(URL) {
-  /*
+siteTools.prototype.getRoster = function(rosterID) {
+  /**
    * Author: Joshua Bell (joshuakbell@gmail.com)
    * Description: gets list of all personnel on a Milpac roster. Does not require login
    * 
@@ -222,6 +257,7 @@ siteTools.prototype.getRoster = function(URL) {
    *    rank {object} - Object literal with infomration about the troopers rank.
    *      shortRank {string} - 3 character abbreviation of the rank. (Ex: Specialist is SPC)
    *      longRank {string} - Full spelling of rank. (Ex: Specialist)
+   *    name {string} - Troopers name without rank. (Ex: John Smith)
    *    id {number} - Milpac ID used in troopers Milpac URL
    *    fullName {string} - Full name with rank of trooper. (Ex: Sergeant John Smith)
    *    enlistedDate {string} - Date trooper enlisted
@@ -229,9 +265,8 @@ siteTools.prototype.getRoster = function(URL) {
    *    primaryBillet {string} - Trooper's primary billet
    */
   
-  //Checks if proper roster URL has been entered
-  if ((URL.search(/us\/rosters/)) == -1.0) {throw new Error("Invalid Roster URL Entered")}
-  
+  if (typeof rosterID != 'number') {throw new Error('siteTools().getRoster(): invalid roster ID. Number not given');}
+
   var rankImageTable = { // URL number that rank represents
     '28': {shortRank: 'RCT', longRank: 'Recruit'},
     '27': {shortRank: 'PVT', longRank: 'Private'},
@@ -263,18 +298,43 @@ siteTools.prototype.getRoster = function(URL) {
     '1': {shortRank: 'GOA', longRank: 'General of the Army'},
   };
   
-  var HTML = UrlFetchApp.fetch(URL).getContentText();
+  var HTML = UrlFetchApp.fetch('https://7cav.us/rosters/?id='+rosterID).getContentText();
   var rawTroopers = HTML.match(/<li.*rosterListItem.[\s\S]*?<\/li>/g); // Gets batches of 
   
   var troopers = [];
   for (var i in rawTroopers) {
+    var rank = rankImageTable[rawTroopers[i].match(/img src.*\/(\d+).jpg/)[1]];
+    var fullName = rawTroopers[i].match(/href.*\s{1,}(.*)/)[1].replace(/&#039;/g,"'");
+    var primary = rawTroopers[i].match(/Custom1..(.*)<\//)[1];
+    
+    var priMatch = primary.match(/ELOA|\w\/\d-7|(Starter|Medical).*\s(\d-7)|Retired|Discharged/i);
+    var AO;
+    if (priMatch != null) { // Finds what AO a person is in based off of their primary billet
+      if (priMatch == 'ELOA') { // If trooper is ELOA
+        AO = 'ELOA'
+      } else if (priMatch[1] == 'Starter') { // If Starter && #-7 is found. Set to SP/#-7
+        AO = 'SP/'+priMatch[2];
+      } else if (priMatch[1] == 'Medical') { // If Starter && #-7 is found. Set to M/#-7
+        AO = 'M/'+priMatch[2];
+      } else if (priMatch == 'Discharged' || priMatch == 'Retired') { // If trooper is Discharged or Retired. Set to DISCH
+        AO = 'DISCH';
+      } else { // If not ELOA, Starter Platoon, Medical Platoon, Retired, or Discharged. Grab their ?/#-7 for AO
+        AO = priMatch
+      }    
+    } else { // If priMatch doesnt find any signifigant characters (Ex: A/1-7, Discharged, ELOA, Retired, etc...) assume trooper is HHQ
+      AO = 'HHQ'; 
+    }
+    
+    
     troopers.push({
-      rankShort: rankImageTable[rawTroopers[i].match(/img src.*\/(\d+).jpg/)[1]],
+      rank: rank,
+      name: fullName.slice(rank.longRank.length+1),
       id: rawTroopers[i].match(/href.*?id.(\d+)"/)[1],
-      fullName: rawTroopers[i].match(/href.*\s{1,}(.*)/)[1],
+      fullName: fullName,
       enlistedDate: rawTroopers[i].match(/Enlisted..(.*)?</)[1],
       promotionDate: rawTroopers[i].match(/Promo..(.*)?</)[1],
-      primaryBillet: rawTroopers[i].match(/Custom1..(.*)<\//)[1]
+      primaryBillet: primary,
+      AO: AO
     });
   }
   
