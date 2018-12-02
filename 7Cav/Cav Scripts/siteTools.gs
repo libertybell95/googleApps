@@ -294,7 +294,7 @@ siteTools.prototype.getRoster = function(rosterID) {
     '4': {shortRank: 'MG', payGrade: 'O-8', longRank: 'Major General'},
     '3': {shortRank: 'LTG', payGrade: 'O-9', longRank: 'Lieutenant General'},
     '2': {shortRank: 'GEN', payGrade: 'O-10A', longRank: 'General'},
-    '1': {shortRank: 'GOA', payGrade: 'O-10B', longRank: 'General of the Army'},
+    '1': {shortRank: 'GOA', payGrade: 'O-10B', longRank: 'General of the Army'}
   };
   
   var HTML = UrlFetchApp.fetch('https://7cav.us/rosters/?id='+rosterID).getContentText();
