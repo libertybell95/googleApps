@@ -1,12 +1,10 @@
 function siteTools() {//For those that may stumble up on this code. This is my first project attempting object-oriented programming, enjoy. :)
-  
-  //Get Session Cookie - START || Fetches xf7cav_session cookie and assigns it to this.cookie
-  this.getCookie = function(user, pw) {
+  this.getCookie = function(user, pw) { // Fetches xf7cav_session cookie and assigns it to this.cookie
     var cookieOptions = {};
     
     cookieOptions.payload = {
-      'login' : PropertiesService.getScriptProperties().getProperty('cavEmail'),
-      'password' : PropertiesService.getScriptProperties().getProperty('cavPW'),
+      'login' : PropertiesService.getScriptProperties().getProperty('cavEmail'), // NOT IN USE
+      'password' : PropertiesService.getScriptProperties().getProperty('cavPW'), // NOT IN USE
       'register' : 0
     };
     
@@ -269,34 +267,34 @@ siteTools.prototype.getRoster = function(rosterID) {
   if (typeof rosterID != 'number') {throw new Error('siteTools().getRoster(): invalid roster ID. Number not given');}
 
   var rankImageTable = { // URL number that rank represents
-    '28': {shortRank: 'RCT', longRank: 'Recruit'},
-    '27': {shortRank: 'PVT', longRank: 'Private'},
-    '26': {shortRank: 'PFC', longRank: 'Private First Class'},
-    '25': {shortRank: 'SPC', longRank: 'Specialist'},
-    '24': {shortRank: 'CPL', longRank: 'Corporal'},
-    '23': {shortRank: 'SGT', longRank: 'Sergeant'},
-    '22': {shortRank: 'SSG', longRank: 'Staff Sergeant'},
-    '21': {shortRank: 'SFC', longRank: 'Sergeant First Class'},
-    '20': {shortRank: 'MSG', longRank: 'Master Sergeant'},
-    '19': {shortRank: '1SG', longRank: 'First Sergeant'},
-    '18': {shortRank: 'SGM', longRank: 'Sergeant Major'},
-    '17': {shortRank: 'CSM', longRank: 'Command Sergeant Major'},
-    '16': {shortRank: 'WO1', longRank: 'Warrant Officer 1'},
-    '15': {shortRank: 'CW2', longRank: 'Chief Warrant Officer 2'},
-    '14': {shortRank: 'CW3', longRank: 'Chief Warrant Officer 3'},
-    '13': {shortRank: 'CW4', longRank: 'Chief Warrant Officer 4'},
-    '12': {shortRank: 'CW5', longRank: 'Chief Warrant Officer 5'},
-    '11': {shortRank: '2LT', longRank: 'Second Lieutenant'},
-    '10': {shortRank: '1LT', longRank: 'First Lieutenant'},
-    '9': {shortRank: 'CPT', longRank: 'Captain'},
-    '8': {shortRank: 'MAJ', longRank: 'Major'},
-    '7': {shortRank: 'LTC', longRank: 'Lieutenant Colonel'},
-    '6': {shortRank: 'COL', longRank: 'Colonel'},
-    '5': {shortRank: 'BG', longRank: 'Brigadier General'},
-    '4': {shortRank: 'MG', longRank: 'Major General'},
-    '3': {shortRank: 'LTG', longRank: 'Lieutenant General'},
-    '2': {shortRank: 'GEN', longRank: 'General'},
-    '1': {shortRank: 'GOA', longRank: 'General of the Army'},
+    '28': {shortRank: 'RCT', payGrade: 'E-1', longRank: 'Recruit'},
+    '27': {shortRank: 'PVT', payGrade: 'E-2', longRank: 'Private'},
+    '26': {shortRank: 'PFC', payGrade: 'E-3', longRank: 'Private First Class'},
+    '25': {shortRank: 'SPC', payGrade: 'E-4A', longRank: 'Specialist'},
+    '24': {shortRank: 'CPL', payGrade: 'E-4B', longRank: 'Corporal'},
+    '23': {shortRank: 'SGT', payGrade: 'E-5', longRank: 'Sergeant'},
+    '22': {shortRank: 'SSG', payGrade: 'E-6', longRank: 'Staff Sergeant'},
+    '21': {shortRank: 'SFC', payGrade: 'E-7', longRank: 'Sergeant First Class'},
+    '20': {shortRank: 'MSG', payGrade: 'E-8A', longRank: 'Master Sergeant'},
+    '19': {shortRank: '1SG', payGrade: 'E-8B', longRank: 'First Sergeant'},
+    '18': {shortRank: 'SGM', payGrade: 'E-9A', longRank: 'Sergeant Major'},
+    '17': {shortRank: 'CSM', payGrade: 'E-9B', longRank: 'Command Sergeant Major'},
+    '16': {shortRank: 'WO1', payGrade: 'W-1', longRank: 'Warrant Officer 1'},
+    '15': {shortRank: 'CW2', payGrade: 'W-2', longRank: 'Chief Warrant Officer 2'},
+    '14': {shortRank: 'CW3', payGrade: 'W-3', longRank: 'Chief Warrant Officer 3'},
+    '13': {shortRank: 'CW4', payGrade: 'W-4', longRank: 'Chief Warrant Officer 4'},
+    '12': {shortRank: 'CW5', payGrade: 'W-5', longRank: 'Chief Warrant Officer 5'},
+    '11': {shortRank: '2LT', payGrade: 'O-1', longRank: 'Second Lieutenant'},
+    '10': {shortRank: '1LT', payGrade: 'O-2', longRank: 'First Lieutenant'},
+    '9': {shortRank: 'CPT', payGrade: 'O-3', longRank: 'Captain'},
+    '8': {shortRank: 'MAJ', payGrade: 'O-4', longRank: 'Major'},
+    '7': {shortRank: 'LTC', payGrade: 'O-5', longRank: 'Lieutenant Colonel'},
+    '6': {shortRank: 'COL', payGrade: 'O-6', longRank: 'Colonel'},
+    '5': {shortRank: 'BG', payGrade: 'O-7', longRank: 'Brigadier General'},
+    '4': {shortRank: 'MG', payGrade: 'O-8', longRank: 'Major General'},
+    '3': {shortRank: 'LTG', payGrade: 'O-9', longRank: 'Lieutenant General'},
+    '2': {shortRank: 'GEN', payGrade: 'O-10A', longRank: 'General'},
+    '1': {shortRank: 'GOA', payGrade: 'O-10B', longRank: 'General of the Army'},
   };
   
   var HTML = UrlFetchApp.fetch('https://7cav.us/rosters/?id='+rosterID).getContentText();
@@ -320,7 +318,7 @@ siteTools.prototype.getRoster = function(rosterID) {
       } else if (priMatch == 'Discharged' || priMatch == 'Retired') { // If trooper is Discharged or Retired. Set to DISCH
         AO = 'DISCH';
       } else { // If not ELOA, Starter Platoon, Medical Platoon, Retired, or Discharged. Grab their ?/#-7 for AO
-        AO = priMatch
+        AO = priMatch;
       }    
     } else { // If priMatch doesnt find any signifigant characters (Ex: A/1-7, Discharged, ELOA, Retired, etc...) assume trooper is HHQ
       AO = 'HHQ'; 
