@@ -8,8 +8,8 @@
  */
 
 function publishJacket(ID, ROW) {
-  ID = 446; // DEBUGGING VARIABLE
-  ROW = 2; // DEBUGGING VARIABLE
+  //ID = 2636; // DEBUGGING VARIABLE
+  //ROW = 16; // DEBUGGING VARIABLE
   
   /*
    * publishJacket() is where all the data compiled in bulidJacket()
@@ -19,18 +19,18 @@ function publishJacket(ID, ROW) {
    * comment block.
    */
   
-  const COL_BOOTGRAD = 'D'; // Column of boot camp graduation date
-  const COL_PROMOSTART = 'E'; // Column of first promotion (Usually PFC).
-  const COL_GCSTART = 'H'; // Column of first GC medal (Usually the initial).
-  const COL_SPECSTATUS = 'C'; // Column of Special Status
-  const COLOR_HAS = '#00B050'; // Color to indicate they have the item
-  const COLOR_NCOA = '#FF9900'; // Color to indicate NCOA completion
-  const COLOR_EMPTY = '#FFFFFF'; // Color for empty (white)
-  var sheetJacketBuilder = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Jacket Builder');
+  const COL_SPECSTATUS = 'G'; // Column of Special Status.
+  const COL_BOOTGRAD = 'H'; // Column of boot camp graduation date.
+  const COL_PROMOSTART = 'I'; // Column of first promotion (Usually PFC).
+  const COL_GCSTART = 'L'; // Column of first GC medal (Usually the initial).
+  const COLOR_HAS = '#00B050'; // Color to indicate they have the item.
+  const COLOR_NCOA = '#FF9900'; // Color to indicate NCOA completion.
+  const COLOR_EMPTY = '#FFFFFF'; // Color for empty (white).
+  var sheetMaster = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Master');
   
   var jacket = buildJacket(ID);
-  //Logger.log('\n'+JSON.stringify(jacket));
-  sheetJacketBuilder.getRange(ROW, colInfo(COL_BOOTGRAD).number).setValue(jacket.bootGrad); // Set boot grad date
+  Logger.log('\n\n'+JSON.stringify(jacket));
+  sheetMaster.getRange(ROW, colInfo(COL_BOOTGRAD).number).setValue(jacket.bootGrad); // Set boot grad date
   
   // START - Publish ranks
   var rankFormulas = [];
@@ -47,7 +47,8 @@ function publishJacket(ID, ROW) {
     if (r == 0) { // If first value in ranks
       var lastCol = COL_BOOTGRAD; // If first, set lastCol to boot grad
       var curentCol = COL_PROMOSTART; // Current column of rank
-      if (jacket.reDate != 'undefined') { // If trooper has a reenlistment
+      if (typeof jacket.reDate != 'undefined') { // If trooper has a reenlistment
+        Logger.log('JDate: '+typeof jacket.reDate);
         var refCell = 'DATEVALUE("'+jacket.reDate.toDateString()+'")';
       } else { // If trooper is not a reenlistment
         var refCell = lastCol+ROW;      
@@ -63,8 +64,8 @@ function publishJacket(ID, ROW) {
     }
     rankFormulas.push('='+refCell+'+'+jacket.rankReqs[currentRank.rank]+add);
   }
-  sheetJacketBuilder.getRange(ROW, colInfo(COL_PROMOSTART).number, 1, rankFormulas.length).setValues([rankFormulas]); // Set rank forumlas
-  sheetJacketBuilder.getRange(ROW, colInfo(COL_PROMOSTART).number, 1, rankFormulas.length).setBackgrounds([rankBGs]); // Set rank background colors
+  sheetMaster.getRange(ROW, colInfo(COL_PROMOSTART).number, 1, rankFormulas.length).setValues([rankFormulas]); // Set rank forumlas
+  sheetMaster.getRange(ROW, colInfo(COL_PROMOSTART).number, 1, rankFormulas.length).setBackgrounds([rankBGs]); // Set rank background colors
   // END - Publish ranks
   
   // START - Publish GCs
@@ -88,12 +89,12 @@ function publishJacket(ID, ROW) {
     }
     var add = '';
     for (var gDTA in currentGC.daysToAdd) {
-      add += '+'+currentGC.daysToAdd;
+      add += '+'+currentGC.daysToAdd[gDTA];
     }
     gcFormulas.push('='+lastCol+ROW+'+'+gcReq+add);
   }
-  sheetJacketBuilder.getRange(ROW, colInfo(COL_GCSTART).number, 1, gcFormulas.length).setValues([gcFormulas]); // set GC forumlas
-  sheetJacketBuilder.getRange(ROW, colInfo(COL_GCSTART).number, 1, gcFormulas.length).setBackgrounds([gcBGs]); // Set GC background colors
+  sheetMaster.getRange(ROW, colInfo(COL_GCSTART).number, 1, gcFormulas.length).setValues([gcFormulas]); // set GC forumlas
+  sheetMaster.getRange(ROW, colInfo(COL_GCSTART).number, 1, gcFormulas.length).setBackgrounds([gcBGs]); // Set GC background colors
   // END - Publish GCs
   
 }
@@ -217,11 +218,12 @@ function buildJacket(ID) {
   for (var n in negativeDays) { // Iterates through each negative day that the trooper has
     var nDate = negativeDays[n].startDate; // The start of the negative day
     var nLength = negativeDays[n].length; // Length, in days, of the negative day
-    
+    if (nLength == 0.0) {continue;}
     for (var gi = 0; gi < jacket.GCs.length; gi++) { // Find first index to start adding days to
       var gDate = new Date(jacket.GCs[gi].date);
       if (nDate < gDate) { // If nDate is greater than GC date, stop at that index and roll it back by 1
         gi--;
+        Logger.log(nLength)
         jacket.GCs[gi].daysToAdd.push(nLength); // Adds the nLength to daysToAdd array for the first index in gi
         break;
       } 
@@ -299,86 +301,4 @@ function getGCs(ID) { // Figures out what GC medals the trooper already has
   }
   
   return GCs;
-}
-
-function dateMath(startDate, var2) {
-  /**
-   * Author: Joshua Bell (joshuakbell@gmail.com) 
-   * Description: Calculates either difference in days between 2 dates. 
-   *   Or calculates the date for the amount of days after a given date
-   * 
-   * If var2 is a NUMBER, dateMath() will return the date that is +- the
-   * startDate. For example: if startDate is 1 January 2018 and var2 is 
-   * 3, then the function will return 4 January 2018 as a Date object.
-   * 
-   * If var2 is a DATE OBJECT, dateMath() will return the difference
-   * between var2 and startDate in days. For Example: if startDate is
-   * 01 January 2018 and var2 is 04 January 2018, then the function will
-   * return the the number 3.
-   * 
-   * If a second arguent is entered that is undefined then then function
-   * will return an error.
-   */
-  
-  startDate = new Date(startDate);
-  if (typeof var2 == 'object' || typeof var2 == 'string') { // Calculated difference if var2 is a date (object or string)
-    var date2 = new Date(var2);
-    var timeDiff = Math.abs(date2.getTime() - date1.getTime());
-    var diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24)); 
-    return diffDays;
-  } else if (typeof var2 == 'number') {
-    var result = startDate;
-    startDate.setDate(startDate.getDate() + var2);
-    return result;
-  } else {
-    return 'Invalid second argument entered. Try again :)';
-  }
-}
-
-function colInfo(colLetter, numAfter) {
-  /**
-   * Author: Joshua Bell (joshuakbell@gmail.com)
-   * Description: Gets column info, for use in getRange() in a Google Sheet
-   *
-   * Input:
-   *   colLetter {string} - Column letter to reference, ensure colLetter IS IN CAPITAL LETTERS
-   *   numAfter {number} - (optional) Amount of columns you want to adde colLetter. See NUMAFTER
-   *     comment block for further info.
-   * 
-   * Output:
-   *   this {object}
-   *     number {number} - Column number.
-   *     colBefore {string} - Column letter that is before colLetter.
-   *     colAfter {string} - Column letter that is after colLetter.
-   *     colMath {number} - See NUMAFTER comment block. Will only return if numAfter input has a
-   *       value that is correct to its requriements.
-   */
-  
-  if (typeof colLetter != 'string') {throw new Error('ColNumber(): Invalid column letter. >> '+colLetter);} // Throws error is colLetter is not a string
-  var cols = [
-    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'X', 'Y', 'Z',
-    'AA', 'AB', 'AC', 'AD', 'AE', 'AF', 'AG', 'AH', 'AI', 'AJ', 'AK', 'AL', 'AM', 'AN', 'AO', 'AP', 'AQ', 'AR', 'AS', 'AT', 'AU', 'AV', 'AW', 'AX', 'AY', 'AZ',
-    'BA', 'BB', 'BC', 'BD', 'BE', 'BF', 'BG', 'BH', 'BI', 'BJ', 'BK', 'BL', 'BM', 'BN', 'BO', 'BP', 'BQ', 'BR', 'BS', 'BT', 'BU', 'BV', 'BW', 'BX', 'BY', 'BZ',
-    'CA', 'CB', 'CC', 'CD', 'CE', 'CF', 'CG', 'CH', 'CI', 'CJ', 'CK', 'CL', 'CM', 'CN', 'CO', 'CP', 'CQ', 'CR', 'CS', 'CT', 'CU', 'CV', 'CW', 'CX', 'CY', 'CZ',
-    'DA', 'DB', 'DC', 'DD', 'DE', 'DF', 'DG', 'DH', 'DI', 'DJ', 'DK', 'DL', 'DM', 'DN', 'DO', 'DP', 'DQ', 'DR', 'DS', 'DT', 'DU', 'DV', 'DW', 'DX', 'DY', 'DZ' 
-  ];
-  var colIndex = cols.indexOf(colLetter);
-  var colInfo = {
-    number: colIndex + 1, // Column number of colLetter
-    colBefore: cols[colIndex - 1], // Column letter of column that is to the direct left of ColLetter (Ex: A is to the left of B)
-    colAfter: cols[colIndex + 1] // Column letter of column that is to the direct right of ColLetter (Ex: C is to the right of B)
-  };
-  if (typeof numAfter == 'number' && numAfter != 0) {
-    /*
-     * NUMAFTER
-     * 
-     * if numAfter is a given and it is a number that is not 0.
-     * then the function will get the column letter that is
-     * +/- from colLetter. For example: If colLetter is A and
-     * numAfter is 5 then it would assign 'F' to .colMath as a
-     * return property of colInfo().
-     */
-    colInfo.colMath = cols[colIndex + numAfter];
-  } 
-  return colInfo;
 }
