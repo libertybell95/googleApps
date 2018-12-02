@@ -263,6 +263,7 @@ siteTools.prototype.getRoster = function(rosterID) {
    *    enlistedDate {string} - Date trooper enlisted
    *    promotionDate {string} - Date trooper was last promoted
    *    primaryBillet {string} - Trooper's primary billet
+   *    AO {string} - Troopers Area of Operations (Ex: SP/1-7 or A/1-7 or HHQ)
    */
   
   if (typeof rosterID != 'number') {throw new Error('siteTools().getRoster(): invalid roster ID. Number not given');}
