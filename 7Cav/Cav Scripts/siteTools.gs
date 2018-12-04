@@ -169,6 +169,10 @@ siteTools.prototype.getMilpac = function(ID) {//Gets information about a milpac.
    *     date {date} - Date of award entry, in UTC
    *     name {string} - Name of award
    *     details {string} - Details for award entry
+   *   classes {array} - Listing of all courses that have been completed, as indicated by the trooper's service record (Will only pick up service record entries that start with "Graduated")
+   *     date {date} - Date of service record entry for class
+   *     entry {string} - Full service record entry
+   *     class {string} - Name of class
    */
   
   if (typeof ID != 'number') {throw new Error("Invalid Milpac ID entered: " + ID)}
@@ -236,6 +240,19 @@ siteTools.prototype.getMilpac = function(ID) {//Gets information about a milpac.
       name: rawAwards[i].match(/<td.*awardTitle..(.*)?<\/td>/)[1],
       details: rawAwards[i].match(/awardDetails..(.*)?<\//)[1]
     });
+  }
+  
+  output.classes = [];
+  for (var i in output.records) {
+    var record = output.records[i];
+    var match = record.entry.match(/Graduated.*/i);
+    if (match != null) {
+      output.classes.push({
+        date: record.date,
+        entry: record.entry,
+        class: match[0].replace(/Graduated |Class.*|, /g, "")
+      })
+    }
   }
   
   return output;
