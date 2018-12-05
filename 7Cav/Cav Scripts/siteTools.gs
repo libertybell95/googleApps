@@ -146,7 +146,7 @@ siteTools.prototype.parseThread = function(URL, pageOptions) {//Extracts certain
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-siteTools.prototype.getMilpac = function(ID) {//Gets information about a milpac. Does not require login
+siteTools.prototype.getMilpac = function(ID) {
   /**
    * Author: Joshua Bell (joshuakbell@gmail.com) 
    * Description: Gets information about a milpac. Does not require login
@@ -157,7 +157,7 @@ siteTools.prototype.getMilpac = function(ID) {//Gets information about a milpac.
    * Input:
    *   ID {number} - Milpac ID number. Found in trooper's milpac URL.
    *   
-   * Output:
+   * Output: (Example for ID 446: https://pastebin.com/gzecJRN5)
    *   fullName {string} - Trooper's full name (Ex: John Smith)
    *   rank {string} - Trooper's rank (Ex: Private First Class)
    *   primaryBillet {string} - Troopers primary position
@@ -179,7 +179,6 @@ siteTools.prototype.getMilpac = function(ID) {//Gets information about a milpac.
   
   if (typeof ID != 'number') {throw new Error("siteTools().getMilpac(): Invalid Milpac ID entered. "+ID)}
   var HTML = UrlFetchApp.fetch('https://7cav.us/rosters/profile?uniqueid='+ID).getContentText();
-  console.log(ID);
   
   var rankTable = {
     'Recruit': 'RCT',
@@ -226,12 +225,12 @@ siteTools.prototype.getMilpac = function(ID) {//Gets information about a milpac.
     long: rank
   };
   
-  var rawRecords = HTML.match(/recordList.[\s\S]*?<\/table/)[0].match(/<td.*?recordDate.[\s\S]*?<\/tr>/g);
+  var rawRecords = HTML.match(/recordList.[\s\S]*?<\/table/)[0].replace(/\s+|\n+/g, ' ').match(/<td.*?recordDate.[\s\S]*?<\/tr>/g); // Replace regex removes line breaks
   output.records = [];
   for (var rI in rawRecords) {
     output.records.push({
-      date: new Date(rawRecords[rI].match(/recordDate..(.*)?<\//)[1]).toUTCString(),
-      entry: rawRecords[rI].match(/Details..(.*)?<\//)[1]
+      date: new Date(rawRecords[rI].match(/recordDate..(.*?)</)[1]).toUTCString(),
+      entry: rawRecords[rI].match(/recordDetails..(.*?)</)[1]
     });
   }
   
@@ -240,24 +239,26 @@ siteTools.prototype.getMilpac = function(ID) {//Gets information about a milpac.
   } catch(e) {
     var rawAwards = [];
   }
+  
   output.awards = [];
   for (var aI in rawAwards) {
+    Logger.log(aI);
     output.awards.push({
       date: new Date(rawAwards[aI].match(/awardDate..(.*)?<\//)[1]).toUTCString(),
       name: rawAwards[aI].match(/<td.*awardTitle..(.*)?<\/td>/)[1],
-      details: rawAwards[aI].match(/awardDetails..(.*)?<\//)[1]
+      details: rawAwards[aI].replace(/\s+|\n+/g, ' ').match(/awardDetails..(.*)?<\//)[1]
     });
   }
   
   output.classes = [];
   for (var cI in output.records) {
     var record = output.records[cI];
-    var match = record.entry.match(/Graduated.*/i);
+    var match = record.entry.match(/Graduated (?!Boot).*/i);
     if (match != null) {
       output.classes.push({
-        date: record.date,
+        date: new Date(record.date),
         entry: record.entry,
-        class: match[0].replace(/Graduated |Class.*|, /g, "")
+        class: match[0].replace(/Graduated | Class.*|,|from /gi, "")
       })
     }
   }
