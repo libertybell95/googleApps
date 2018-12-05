@@ -19,6 +19,9 @@ function publishJacket(ID, ROW) {
    * comment block.
    */
   
+  if (typeof ID != 'number') {throw new Error('publishJacket(): ID wrong number type.'+typeof ID)}
+  if (typeof ROW != 'number') {throw new Error('publishJacket(): ID wrong number type.'+typeof ROW)}
+  
   const COL_SPECSTATUS = 'G'; // Column of Special Status.
   const COL_BOOTGRAD = 'H'; // Column of boot camp graduation date.
   const COL_PROMOSTART = 'I'; // Column of first promotion (Usually PFC).
@@ -29,7 +32,7 @@ function publishJacket(ID, ROW) {
   var sheetMaster = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Master');
   
   var jacket = buildJacket(ID);
-  Logger.log('\n\n'+JSON.stringify(jacket));
+  //Logger.log('\n\n'+JSON.stringify(jacket));
   sheetMaster.getRange(ROW, colInfo(COL_BOOTGRAD).number).setValue(jacket.bootGrad); // Set boot grad date
   
   // START - Publish ranks
@@ -48,7 +51,7 @@ function publishJacket(ID, ROW) {
       var lastCol = COL_BOOTGRAD; // If first, set lastCol to boot grad
       var curentCol = COL_PROMOSTART; // Current column of rank
       if (typeof jacket.reDate != 'undefined') { // If trooper has a reenlistment
-        Logger.log('JDate: '+typeof jacket.reDate);
+        //Logger.log('JDate: '+typeof jacket.reDate);
         var refCell = 'DATEVALUE("'+jacket.reDate.toDateString()+'")';
       } else { // If trooper is not a reenlistment
         var refCell = lastCol+ROW;      
@@ -212,6 +215,7 @@ function buildJacket(ID) {
   } // End of buildInitialJacket()
   
   var jacket = buildInitialJacket();
+  Logger.log(JSON.stringify(jacket));
   var negativeDays = CAV_negativeDays(this.ID);
   
   // START - Add negative days to GCs
@@ -222,8 +226,7 @@ function buildJacket(ID) {
     for (var gi = 0; gi < jacket.GCs.length; gi++) { // Find first index to start adding days to
       var gDate = new Date(jacket.GCs[gi].date);
       if (nDate < gDate) { // If nDate is greater than GC date, stop at that index and roll it back by 1
-        gi--;
-        Logger.log(nLength)
+        if (gi != 0.0) {gi--;}
         jacket.GCs[gi].daysToAdd.push(nLength); // Adds the nLength to daysToAdd array for the first index in gi
         break;
       } 
@@ -242,11 +245,11 @@ function buildJacket(ID) {
   // Negative days will only be added to those that occur after the reenlistment
   // Also determine if trooper is an reenlisment and assigns the most recent reenlistment date to property jacket.reDate
   var negativeDays = negativeDays.reverse();
-  Logger.log(JSON.stringify(negativeDays))
+  //Logger.log(JSON.stringify(negativeDays))
   for (var nR = 0; nR < negativeDays.length; nR++) { // Finds the last reenlistment
     if (negativeDays[nR].endEntry.match(/Re|-7/i) != null) { 
       if (negativeDays[nR].endEntry.match(/ELOA/i) == null) { // If negDay end entry was not ELOA related. set jacket.reDate to the reenlistment date and stop search loop
-        Logger.log(JSON.stringify(negativeDays[nR]));
+        //Logger.log(JSON.stringify(negativeDays[nR]));
         jacket.reDate = new Date(negativeDays[nR].endDate); 
         jacket.ranks[0].date += (jacket.reDate - jacket.bootGrad); // Assigns the difference between the reenlistment and bootcamp grad dates to the .date property in first index of jacket.ranks
         jacket.rankReqs['PFC'] = 30; // PFCREQRESET | Sets the rank requirement back to 30 days TIS if honor grad checker knocked down the days
@@ -293,7 +296,7 @@ function getGCs(ID) { // Figures out what GC medals the trooper already has
       if (awardDetail == '' || typeof awardDetail == 'undefined') {
         knot = 'Init'; // If there is no award details for the GC, assume that it is the initial GC
       } else {
-        var match = awardDetail.match(/(1|2|3|4|5).*(Bronze|Silver|Gold).*Knot/i);
+        var match = awardDetail.match(/(1|2|3|4|5).*(Bronze|Silver|Gold)/i);
         knot = match[1]+match[2][0]; // number obtained and first letter of knot type
       }
       GCs.push(knot);
