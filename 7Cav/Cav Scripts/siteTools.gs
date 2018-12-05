@@ -80,8 +80,7 @@ siteTools.prototype.getThreads = function(URL, pageOptions) {//Gets list of thre
     //thread.updateDate = threads[i].match(/data-time..(.*)...data-diff/gi);
     
     
-    //TODO:
-    // Make start date parser. 
+    // TODO Make start date parser
     
     forumContents[i] = thread;
   }
@@ -151,6 +150,9 @@ siteTools.prototype.getMilpac = function(ID) {//Gets information about a milpac.
   /**
    * Author: Joshua Bell (joshuakbell@gmail.com) 
    * Description: Gets information about a milpac. Does not require login
+   *
+   * TODO Get secondaryBillet finder built
+   * TODO Handle if no awards are found (See ID 447 for example)
    * 
    * Input:
    *   ID {number} - Milpac ID number. Found in trooper's milpac URL.
@@ -175,8 +177,9 @@ siteTools.prototype.getMilpac = function(ID) {//Gets information about a milpac.
    *     class {string} - Name of class
    */
   
-  if (typeof ID != 'number') {throw new Error("Invalid Milpac ID entered: " + ID)}
+  if (typeof ID != 'number') {throw new Error("siteTools().getMilpac(): Invalid Milpac ID entered. "+ID)}
   var HTML = UrlFetchApp.fetch('https://7cav.us/rosters/profile?uniqueid='+ID).getContentText();
+  console.log(ID);
   
   var rankTable = {
     'Recruit': 'RCT',
@@ -225,26 +228,30 @@ siteTools.prototype.getMilpac = function(ID) {//Gets information about a milpac.
   
   var rawRecords = HTML.match(/recordList.[\s\S]*?<\/table/)[0].match(/<td.*?recordDate.[\s\S]*?<\/tr>/g);
   output.records = [];
-  for (var i in rawRecords) {
+  for (var rI in rawRecords) {
     output.records.push({
-      date: new Date(rawRecords[i].match(/recordDate..(.*)?<\//)[1]).toUTCString(),
-      entry: rawRecords[i].match(/Details..(.*)?<\//)[1]
+      date: new Date(rawRecords[rI].match(/recordDate..(.*)?<\//)[1]).toUTCString(),
+      entry: rawRecords[rI].match(/Details..(.*)?<\//)[1]
     });
   }
   
-  var rawAwards = HTML.match(/awardList.[\s\S]*?<\/table/)[0].match(/<td.*?awardDate.[\s\S]*?<\/tr>/g);
+  try { // try...catch defines rawAwards if the trooper has no awards
+    var rawAwards = HTML.match(/awardList.[\s\S]*?<\/table/i)[0].match(/<td.*?awardDate.[\s\S]*?<\/tr>/g);
+  } catch(e) {
+    var rawAwards = [];
+  }
   output.awards = [];
-  for (var i in rawAwards) {
+  for (var aI in rawAwards) {
     output.awards.push({
-      date: new Date(rawAwards[i].match(/awardDate..(.*)?<\//)[1]).toUTCString(),
-      name: rawAwards[i].match(/<td.*awardTitle..(.*)?<\/td>/)[1],
-      details: rawAwards[i].match(/awardDetails..(.*)?<\//)[1]
+      date: new Date(rawAwards[aI].match(/awardDate..(.*)?<\//)[1]).toUTCString(),
+      name: rawAwards[aI].match(/<td.*awardTitle..(.*)?<\/td>/)[1],
+      details: rawAwards[aI].match(/awardDetails..(.*)?<\//)[1]
     });
   }
   
   output.classes = [];
-  for (var i in output.records) {
-    var record = output.records[i];
+  for (var cI in output.records) {
+    var record = output.records[cI];
     var match = record.entry.match(/Graduated.*/i);
     if (match != null) {
       output.classes.push({
