@@ -8,8 +8,8 @@
  */
 
 function publishJacket(ID, ROW) {
-  //ID = 2636; // DEBUGGING VARIABLE
-  //ROW = 16; // DEBUGGING VARIABLE
+  if (typeof ID != 'number') {throw new Error('publishJacket(): ID wrong number type.'+typeof ID)} // Variable type checking
+  if (typeof ROW != 'number') {throw new Error('publishJacket(): ID wrong number type.'+typeof ROW)} // Variable type checking
   
   /*
    * publishJacket() is where all the data compiled in bulidJacket()
@@ -18,9 +18,6 @@ function publishJacket(ID, ROW) {
    * sheet is the variables that are in the ~10 lines following this
    * comment block.
    */
-  
-  if (typeof ID != 'number') {throw new Error('publishJacket(): ID wrong number type.'+typeof ID)}
-  if (typeof ROW != 'number') {throw new Error('publishJacket(): ID wrong number type.'+typeof ROW)}
   
   const COL_SPECSTATUS = 'G'; // Column of Special Status.
   const COL_BOOTGRAD = 'H'; // Column of boot camp graduation date.
@@ -32,7 +29,6 @@ function publishJacket(ID, ROW) {
   var sheetMaster = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Master');
   
   var jacket = buildJacket(ID);
-  //Logger.log('\n\n'+JSON.stringify(jacket));
   sheetMaster.getRange(ROW, colInfo(COL_BOOTGRAD).number).setValue(jacket.bootGrad); // Set boot grad date
   
   // START - Publish ranks
@@ -105,9 +101,12 @@ function publishJacket(ID, ROW) {
 function buildJacket(ID) {
   if (typeof ID != 'number') {throw new Error('buildJacket(): Invalid milpac ID entered. '+ID)} // Ensures that a number was entered into ID variable
   this.ID = ID;
+  this.GCmilpac = CAV_getMilpac(this.ID);
+  CacheService.getScriptCache().put('GC_milpac', JSON.stringify(CAV_getMilpac(this.ID)));
+  
   
   function getBootGrad() { // Gets date of the service record entry that has boot camp graduation.
-    var serviceRecord = CAV_getMilpac(this.ID).records.reverse();
+    var serviceRecord = JSON.parse(CacheService.getScriptCache().get('GC_milpac')).records.reverse();
     for (var i in serviceRecord) {
       if (serviceRecord[i].entry.search(/grad|complete|graduate|honor|graduate/i) != -1.0) {
         break;
@@ -147,11 +146,11 @@ function buildJacket(ID) {
     };
     
     jacket.gcReqs = { // Day requirements for Good Conduct Medals
-      'init': 30, // initial GC
+      'init': 365, // Initial GC
       'knot': 365 // GC Knots
     };
     
-    var serviceRecord = CAV_getMilpac(this.ID).records;
+    var serviceRecord = JSON.parse(CacheService.getScriptCache().get('GC_milpac')).records;
     for (var i in serviceRecord) { // Checks for honor graduate
       if (serviceRecord[i].entry.search(/Honor/i) != -1.0) {
         /** 
@@ -188,7 +187,7 @@ function buildJacket(ID) {
       {award: '4G', date: dateMath(bootGrad, (jacket.gcReqs['knot'] * 12)), daysToAdd: []}
     ];
     
-    var shortRank = CAV_getMilpac(this.ID).rank.short;
+    var shortRank = JSON.parse(CacheService.getScriptCache().get('GC_milpac')).rank.short;
     for (var i in jacket.ranks) { // Goes through each of jacket.ranks and if the trooper is above or at that rank; give the index in jacket.ranks the 'has' property with the value of true
       if (shortRank == 'PVT' || shortRank == 'RCT') {break;}
       jacket.ranks[i].has = true;
@@ -215,7 +214,6 @@ function buildJacket(ID) {
   } // End of buildInitialJacket()
   
   var jacket = buildInitialJacket();
-  Logger.log(JSON.stringify(jacket));
   var negativeDays = CAV_negativeDays(this.ID);
   
   // START - Add negative days to GCs
@@ -232,8 +230,6 @@ function buildJacket(ID) {
       } 
     }
     
-    
-    
     for (; gi < jacket.GCs.length; gi++) { // For each GC that is affected by the negative days. Add the nDays to current date
       var gDate = new Date(jacket.GCs[gi].date);
       jacket.GCs[gi].date = dateMath(gDate, nLength);
@@ -245,16 +241,18 @@ function buildJacket(ID) {
   // Negative days will only be added to those that occur after the reenlistment
   // Also determine if trooper is an reenlisment and assigns the most recent reenlistment date to property jacket.reDate
   var negativeDays = negativeDays.reverse();
-  //Logger.log(JSON.stringify(negativeDays))
-  for (var nR = 0; nR < negativeDays.length; nR++) { // Finds the last reenlistment
-    if (negativeDays[nR].endEntry.match(/Re|-7/i) != null) { 
-      if (negativeDays[nR].endEntry.match(/ELOA/i) == null) { // If negDay end entry was not ELOA related. set jacket.reDate to the reenlistment date and stop search loop
-        //Logger.log(JSON.stringify(negativeDays[nR]));
-        jacket.reDate = new Date(negativeDays[nR].endDate); 
-        jacket.ranks[0].date += (jacket.reDate - jacket.bootGrad); // Assigns the difference between the reenlistment and bootcamp grad dates to the .date property in first index of jacket.ranks
-        jacket.rankReqs['PFC'] = 30; // PFCREQRESET | Sets the rank requirement back to 30 days TIS if honor grad checker knocked down the days
-        break;
-      }
+  for (var nR = 0; nR < negativeDays.length; nR++) { // Searches for most recent reenlistment
+    if (negativeDays[nR].endEntry.match(/Re|-7/i) != null && negativeDays[nR].endEntry.match(/ELOA/i) == null)  {
+      /**
+       * If a reenlistment is found and negDay end entry is not ELOA Related.
+       * set jacket.reDate to the reenlistment date and stop search loop.
+       * 
+       */
+      //Logger.log(jacket.)
+      jacket.reDate = new Date(negativeDays[nR].endDate); 
+      jacket.ranks[0].date += (jacket.reDate - jacket.bootGrad); // Assigns the difference between the reenlistment and bootcamp grad dates to the .date property in first index of jacket.ranks
+      jacket.rankReqs['PFC'] = 30; // PFCREQRESET | Sets the rank requirement back to 30 days TIG if honor grad checker removed TIG requrement
+      break;
     }
   }
   var negativeDayRanks = negativeDays.slice(0, nR-1);
@@ -279,6 +277,7 @@ function buildJacket(ID) {
   }
   // END - Add negative days to ranks.
   
+  CacheService.getScriptCache().remove('GC_milpac');
   return jacket;
 }
 
